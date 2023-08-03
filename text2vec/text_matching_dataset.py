@@ -46,15 +46,16 @@ def load_text_matching_train_data(path):
             data.append((text_a, text_b, score))
     else:
         with open(path, 'r', encoding='utf8') as f:
-            for line in f:
+            for i, line in enumerate(f):
                 line = line.strip().split('\t')
                 if len(line) != 3:
-                    logger.warning(f'line size not match, pass: {line}')
+                    logger.warning(f'line size not match, pass: {i}, {line}')
                     continue
                 score = int(line[2])
                 if 'STS' in path.upper():
                     score = int(score > 2.5)
                 data.append((line[0], line[1], score))
+    print("data: ", len(data))
     return data
 
 
@@ -88,10 +89,10 @@ def load_text_matching_test_data(path):
             data.append((text_a, text_b, score))
     else:
         with open(path, 'r', encoding='utf8') as f:
-            for line in f:
+            for i, line in enumerate(f):
                 line = line.strip().split('\t')
                 if len(line) != 3:
-                    logger.warning(f'line size not match, pass: {line}')
+                    logger.warning(f'line size not match, pass: {i}, {line}')
                     continue
                 score = int(line[2])
                 data.append((line[0], line[1], score))

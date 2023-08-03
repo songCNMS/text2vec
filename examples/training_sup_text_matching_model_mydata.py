@@ -3,6 +3,8 @@
 @author:XuMing(xuming624@qq.com)
 @description: 
 """
+import sys
+sys.path.append("/home/lesong/text2vec")
 import argparse
 import sys
 import time
@@ -38,16 +40,19 @@ def calc_similarity_scores(model, sents1, sents2, labels):
 
 def main():
     parser = argparse.ArgumentParser('Text Matching task')
-    parser.add_argument('--model_arch', default='cosent', const='cosent', nargs='?',
+    parser.add_argument('--model_arch', default='sentencebert', const='sentencebert', nargs='?',
                         choices=['cosent', 'sentencebert', 'bert'], help='model architecture')
     parser.add_argument('--model_name', default='hfl/chinese-macbert-base', type=str,
                         help='Transformers model model or path')
-    parser.add_argument('--train_file', default='data/STS-B/STS-B.train.data', type=str, help='Train data path')
-    parser.add_argument('--valid_file', default='data/STS-B/STS-B.valid.data', type=str, help='Valid data path')
-    parser.add_argument('--test_file', default='data/STS-B/STS-B.test.data', type=str, help='Test data path')
+    parser.add_argument('--train_file', default='Product_Sim_Train.csv', type=str, help='Train data path')
+    parser.add_argument('--valid_file', default='Product_Sim_Valid.csv', type=str, help='Valid data path')
+    parser.add_argument('--test_file', default='Product_Sim_Test.csv', type=str, help='Test data path')
+    # parser.add_argument('--train_file', default=None, type=str, help='Train data path')
+    # parser.add_argument('--valid_file', default=None, type=str, help='Valid data path')
+    # parser.add_argument('--test_file', default=None, type=str, help='Test data path')
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_predict", action="store_true", help="Whether to run predict.")
-    parser.add_argument('--output_dir', default='./outputs/STS-B-model', type=str, help='Model output directory')
+    parser.add_argument('--output_dir', default='./outputs/Product_Sim/', type=str, help='Model output directory')
     parser.add_argument('--max_seq_length', default=128, type=int, help='Max sequence length')
     parser.add_argument('--num_epochs', default=10, type=int, help='Number of training epochs')
     parser.add_argument('--batch_size', default=64, type=int, help='Batch size')
@@ -87,6 +92,7 @@ def main():
             batch_size=args.batch_size,
             lr=args.learning_rate,
             bf16=args.bf16,
+            use_hf_dataset=False,
             data_parallel=args.data_parallel,
         )
         logger.info(f"Model saved to {args.output_dir}")
@@ -120,12 +126,15 @@ def main():
             srcs.append(src)
             trgs.append(trg)
             labels.append(label)
+            
+        logger.debug(f'{test_data}')
         logger.debug(f'{test_data[0]}')
         sentence_embeddings = model.encode(srcs)
         logger.debug(f"{type(sentence_embeddings)}, {sentence_embeddings.shape}, {sentence_embeddings[0].shape}")
         # Predict similarity scores
-        calc_similarity_scores(model, srcs, trgs, labels)
+        spearman = calc_similarity_scores(model, srcs, trgs, labels)
 
 
 if __name__ == '__main__':
     main()
+    # --model_arch sentencebert --model_name GanymedeNil/text2vec-large-chinese --

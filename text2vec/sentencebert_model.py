@@ -319,6 +319,11 @@ class SentenceBertModel(SentenceModel):
                 training_progress_scores[key].append(results[key])
             report = pd.DataFrame(training_progress_scores)
             report.to_csv(os.path.join(output_dir, "training_progress_scores.csv"), index=False)
+            for col in report.columns[1:]:
+                ax = report[col].plot()
+                ax.figure.savefig(os.path.join(output_dir, f"{col}.png"))
+                logger.info(f"save figure of {col}")
+            
 
             eval_spearman = results["eval_spearman"]
             if eval_spearman > best_eval_metric:
